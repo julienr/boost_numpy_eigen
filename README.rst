@@ -12,6 +12,7 @@ To run (assuming you've boost.python already installed)::
 
 Links :
 https://github.com/ndarray/Boost.NumPy
+
 http://eigen.tuxfamily.org/index.php?title=Main_Page
 
 There also is the 'ndarray' project, that aims at providing a multidimensionnal
