@@ -73,39 +73,6 @@ struct EigenMatrixToPython {
 };
 
 
-// This is just a factory class for a Map wrapping a Matrix of type MatType
-// We need a factory class because we need to differentiate between matrix
-// with compile-time size and dynamic matrices to get the correct Map
-template<typename MatType, int R, int C>
-struct MapCreator {
-  typedef typename MatType::Scalar T;
-  typedef Map<Matrix<T, R, C, RowMajor>,
-                Aligned,
-                Stride<R, C>> MapType;
-
-  void create(void* storage, T* raw_data, int s1, int s2, int dtype_size) {
-    LOG(INFO) << "Fixed-size map" << R << C;
-    new (storage) MapType(raw_data,
-         Stride<R, C>(s1/dtype_size, s2/dtype_size));
-  }
-};
-
-template<typename MatType>
-struct MapCreator<MatType, Dynamic, Dynamic> {
-  typedef typename MatType::Scalar T;
-  typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>,
-                Aligned,
-                Stride<Dynamic, Dynamic>> MapType;
-
-  void create(void* storage, T* raw_data, int s1, int s2, int dtype_size) {
-    LOG(INFO) << "Dynamic map";
-    new (storage) MapType(raw_data, Dynamic, Dynamic,
-         Stride<Dynamic, Dynamic>(s1/dtype_size, s2/dtype_size));
-  }
-};
-
-
-
 template<typename MatType>
 struct EigenMatrixFromPython {
   typedef typename MatType::Scalar T;
@@ -121,10 +88,6 @@ struct EigenMatrixFromPython {
       LOG(ERROR) << "PyArray_Check failed";
       return 0;
     }
-    /*if (PyArray_NDIM(obj_ptr)!=2) {
-      LOG(ERROR) << "dim != 2";
-      return 0;
-    }*/
     if (PyArray_NDIM(obj_ptr) > 2) {
       LOG(ERROR) << "dim > 2";
       return 0;
@@ -211,23 +174,6 @@ struct EigenMatrixFromPython {
 
     T* raw_data = reinterpret_cast<T*>(PyArray_DATA(array));
 
-    /*typedef Map<Matrix<T, R, C, RowMajor>,
-                Aligned,
-                Stride<R, C>> MapType;
-                //Stride<Dynamic, Dynamic>> MapType;*/
-
-    //int nrows = R;
-    //int ncols = C;
-    //if (R == Eigen::Dynamic) {
-      //nrows = array->dimensions[0];
-    //}
-    //if (ndims > 1 && C == Eigen::Dynamic) {
-      //ncols = array->dimensions[1];
-    //}
-
-    //if (dynamic_size) {
-/*      new (storage) MapType(raw_data, nrows, ncols,
-           Stride<R, C>(s1/dtype_size, s2/dtype_size));*/
     typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>, Aligned,
                 Stride<Dynamic, Dynamic>> MapType;
 
@@ -236,23 +182,10 @@ struct EigenMatrixFromPython {
 
     new (storage) MatType;
     MatType* emat = (MatType*)storage;
+    // TODO: This is a (potentially) expensive copy operation. There should
+    // be a better way
     *emat = MapType(raw_data, nrows, ncols,
                 Stride<Dynamic, Dynamic>(s1/dtype_size, s2/dtype_size));
-
-
-    /*new (storage) MapType(raw_data, nrows, ncols,
-                Stride<Dynamic, Dynamic>(s1/dtype_size, s2/dtype_size));*/
-    /*} else {
-      new (storage) MapType(raw_data,
-           Stride<R, C>(s1/dtype_size, s2/dtype_size));
-    }*/
-        //Stride<Dynamic, Dynamic>(s1/dtype_size, s2/dtype_size));
-    /*typedef MapCreator<MatType, R, C> Creator;
-    typedef typename Creator::MapType MapType;
-    Creator creator;
-    creator.create(storage, raw_data, s1, s2, dtype_size);*/
-
-    //MapType* emap = (MapType*)storage;
     data->convertible = storage;
   }
 };

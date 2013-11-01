@@ -22,3 +22,7 @@ There also is the 'ndarray' project, that aims at providing a multidimensionnal
 array library similar to numpy.ndarray for C++. Some of the code comes from
 ndarray :
 https://github.com/ndarray/ndarray
+
+TODO:
+- The from python converts do some data copy. This could hurt for big
+  matrices
