@@ -3,6 +3,19 @@
 #include <glog/logging.h>
 #include <numpy/arrayobject.h>
 
+// These macros were renamed in NumPy 1.7.1.
+#ifndef NPY_ARRAY_C_CONTIGUOUS
+#ifdef NPY_C_CONTIGUOUS
+#define NPY_ARRAY_C_CONTIGUOUS NPY_C_CONTIGUOUS
+#endif
+#endif
+
+#ifndef NPY_ARRAY_ALIGNED
+#ifdef NPY_ALIGNED
+#define NPY_ARRAY_ALIGNED NPY_ALIGNED
+#endif
+#endif
+
 namespace bp = boost::python;
 namespace np = boost::numpy;
 
