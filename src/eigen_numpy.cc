@@ -203,9 +203,39 @@ struct EigenMatrixFromPython {
   }
 };
 
+
+template<class TransformType> // MatrixXf or MatrixXd
+struct EigenTransformToPython {
+  static PyObject* convert(const TransformType& transform) {
+      return EigenMatrixToPython<typename TransformType::MatrixType>::convert(transform.matrix());
+  }
+};
+
+template<typename TransformType>
+struct EigenTransformFromPython {
+  EigenTransformFromPython() {
+    bp::converter::registry::push_back(&convertible,
+                                       &construct,
+                                       bp::type_id<TransformType>());
+  }
+
+  static void* convertible(PyObject* obj_ptr) {
+    return EigenMatrixFromPython<typename TransformType::MatrixType>::convertible(obj_ptr);
+  }
+
+  static void construct(PyObject* obj_ptr,
+                        bp::converter::rvalue_from_python_stage1_data* data) {
+    return EigenMatrixFromPython<typename TransformType::MatrixType>::construct(obj_ptr, data);
+  }
+};
+
 #define EIGEN_MATRIX_CONVERTER(Type) \
   EigenMatrixFromPython<Type>();  \
   bp::to_python_converter<Type, EigenMatrixToPython<Type> >();
+
+#define EIGEN_TRANSFORM_CONVERTER(Type) \
+  EigenTransformFromPython<Type>();  \
+  bp::to_python_converter<Type, EigenTransformToPython<Type> >();
 
 #define MAT_CONV(R, C, T) \
   typedef Matrix<T, R, C> Matrix ## R ## C ## T; \
@@ -243,6 +273,11 @@ void SetupEigenConverters() {
   EIGEN_MATRIX_CONVERTER(Vector2d);
   EIGEN_MATRIX_CONVERTER(Vector3d);
   EIGEN_MATRIX_CONVERTER(Vector4d);
+
+  EIGEN_TRANSFORM_CONVERTER(Affine2f);
+  EIGEN_TRANSFORM_CONVERTER(Affine3f);
+  EIGEN_TRANSFORM_CONVERTER(Affine2d);
+  EIGEN_TRANSFORM_CONVERTER(Affine3d);
 
   MAT_CONV(2, 3, double);
   MAT_CONV(X, 3, double);
