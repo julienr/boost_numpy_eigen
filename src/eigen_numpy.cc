@@ -258,6 +258,10 @@ struct EigenTransformFromPython {
 static const int X = Eigen::Dynamic;
 
 void SetupEigenConverters() {
+  static bool is_setup = false;
+  if (is_setup) return;
+  is_setup = true;
+
   import_array();
 
   EIGEN_MATRIX_CONVERTER(Matrix2f);
