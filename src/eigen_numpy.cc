@@ -1,6 +1,5 @@
 #include <Eigen/Eigen>
 #include <boost/numpy.hpp>
-#include <glog/logging.h>
 #include <numpy/arrayobject.h>
 
 // These macros were renamed in NumPy 1.7.1.
@@ -98,24 +97,24 @@ struct EigenMatrixFromPython {
 
   static void* convertible(PyObject* obj_ptr) {
     if (!PyArray_Check(obj_ptr)) {
-      LOG(ERROR) << "PyArray_Check failed";
+      //LOG(ERROR) << "PyArray_Check failed";
       return 0;
     }
     if (PyArray_NDIM(obj_ptr) > 2) {
-      LOG(ERROR) << "dim > 2";
+      //LOG(ERROR) << "dim > 2";
       return 0;
     }
     if (PyArray_ObjectType(obj_ptr, 0) != NumpyEquivalentType<typename MatType::Scalar>::type_code) {
-      LOG(ERROR) << "types not compatible";
+      //LOG(ERROR) << "types not compatible";
       return 0;
     }
     int flags = PyArray_FLAGS(obj_ptr);
     if (!(flags & NPY_ARRAY_C_CONTIGUOUS)) {
-      LOG(ERROR) << "Contiguous C array required";
+      //LOG(ERROR) << "Contiguous C array required";
       return 0;
     }
     if (!(flags & NPY_ARRAY_ALIGNED)) {
-      LOG(ERROR) << "Aligned array required";
+      //LOG(ERROR) << "Aligned array required";
       return 0;
     }
     return obj_ptr;
@@ -133,11 +132,11 @@ struct EigenMatrixFromPython {
 
     int dtype_size = (PyArray_DESCR(obj_ptr))->elsize;
     int s1 = PyArray_STRIDE(obj_ptr, 0);
-    CHECK_EQ(0, s1 % dtype_size);
+    //CHECK_EQ(0, s1 % dtype_size);
     int s2 = 0;
     if (ndims > 1) {
       s2 = PyArray_STRIDE(obj_ptr, 1);
-      CHECK_EQ(0, s2 % dtype_size);
+      //CHECK_EQ(0, s2 % dtype_size);
     }
 
 
@@ -145,29 +144,29 @@ struct EigenMatrixFromPython {
     int ncols = C;
     if (ndims == 2) {
       if (R != Eigen::Dynamic) {
-        CHECK_EQ(R, array->dimensions[0]);
+        //CHECK_EQ(R, array->dimensions[0]);
       } else {
         nrows = array->dimensions[0];
       }
 
       if (C != Eigen::Dynamic) {
-        CHECK_EQ(C, array->dimensions[1]);
+        //CHECK_EQ(C, array->dimensions[1]);
       } else {
         ncols = array->dimensions[1];
       }
     } else {
-      CHECK_EQ(1, ndims);
+      //CHECK_EQ(1, ndims);
       // Vector are a somehow special case because for Eigen, everything is
       // a 2D array with a dimension set to 1, but to numpy, vectors are 1D
       // arrays
       // So we could get a 1x4 array for a Vector4
 
       // For a vector, at least one of R, C must be 1
-      CHECK(R == 1 || C == 1);
+      //CHECK(R == 1 || C == 1);
 
       if (R == 1) {
         if (C != Eigen::Dynamic) {
-          CHECK_EQ(C, array->dimensions[0]);
+          //CHECK_EQ(C, array->dimensions[0]);
         } else {
           ncols = array->dimensions[0];
         }
@@ -178,7 +177,7 @@ struct EigenMatrixFromPython {
         std::swap(s1, s2);
       } else {
         if (R != Eigen::Dynamic) {
-          CHECK_EQ(R, array->dimensions[0]);
+          //CHECK_EQ(R, array->dimensions[0]);
         } else {
           nrows = array->dimensions[0];
         }
@@ -187,8 +186,7 @@ struct EigenMatrixFromPython {
 
     T* raw_data = reinterpret_cast<T*>(PyArray_DATA(array));
 
-    typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>, Aligned,
-                Stride<Dynamic, Dynamic>> MapType;
+    typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>, Aligned, Stride<Dynamic, Dynamic> > MapType;
 
     void* storage=((bp::converter::rvalue_from_python_storage<MatType>*)
                    (data))->storage.bytes;
