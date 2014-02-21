@@ -18,7 +18,6 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 find_package(NumPy)
 include_directories(${NUMPY_INCLUDE_DIRS})
 
-include_directories(${PROJECT_SOURCE_DIR}/../externals/include)
 include_directories(${BoostNumPy_INCLUDE_DIR})
 
 add_library(boost_numpy_eigen SHARED src/eigen_numpy.cc)
