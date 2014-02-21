@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(boost.numpy_eigen)
 
-set(BoostNumPy_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../externals/include)
-set(BoostNumPy_LIBRARIES ${PROJECT_SOURCE_DIR}/../externals/lib/libboost_numpy.dylib)
-
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
