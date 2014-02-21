@@ -23,3 +23,9 @@ link_directories(${BoostNumPy_LIBRARY_DIR})
 
 add_library(boost_numpy_eigen SHARED src/eigen_numpy.cc)
 target_link_libraries(boost_numpy_eigen ${Boost_LIBRARIES} ${BoostNumPy_LIBRARIES} ${PYTHON_LIBRARIES})
+
+install(TARGETS boost_numpy_eigen
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(FILES src/eigen_numpy.h DESTINATION include/boost/)
