@@ -29,3 +29,11 @@ install(TARGETS boost_numpy_eigen
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 install(FILES src/eigen_numpy.h DESTINATION include/boost/)
+
+# Building a package with CPack.
+set(CPACK_PACKAGE_NAME boost-numpy-eigen)
+set(CPACK_PACKAGE_VERSION 1)
+set(CPACK_PACKAGE_CONTACT "Michael Koval <mkoval@cs.cmu.edu>")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "python-dev, libboost-python-dev, boost-numpy, libeigen3-dev")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Automatic conversions between NumPy and Eigen using Boost.NumPy.")
+include(CPack)
