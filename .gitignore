@@ -1,3 +1,8 @@
+lib/
+libs/
+CMakeFiles/
+Makefile
+CMakeCache.txt
+cmake_install.cmake
 *.o
 *.so
-libs/
