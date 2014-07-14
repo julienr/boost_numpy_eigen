@@ -1,20 +1,16 @@
-This is a simple example on how to use boost.python and boost.numpy to call
-c++ code form python and convert numpy arrays to Eigen.
+This is a simple example on how to use boost.python to call
+c++ code from python and convert numpy arrays to Eigen.
 
 To run (assuming you've boost.python already installed)::
 
-  git submodule init
-  git submodule update
-  ./build.sh      # will build boost.numpy
-  make
-  ./run.sh hello.py
-  make test
-  ./run.sh test_eigen_numpy.py
+  cmake .
+  make hello
+  python hello.py
+  make test_eigen_numpy_mod
+  python test_eigen_numpy.py
 
 
 Links :
-
-https://github.com/ndarray/Boost.NumPy
 
 http://eigen.tuxfamily.org/index.php?title=Main_Page
 
