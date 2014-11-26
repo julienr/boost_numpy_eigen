@@ -279,6 +279,11 @@ void SetupEigenConverters() {
   EIGEN_TRANSFORM_CONVERTER(Affine2d);
   EIGEN_TRANSFORM_CONVERTER(Affine3d);
 
+  EIGEN_TRANSFORM_CONVERTER(Projective2f);
+  EIGEN_TRANSFORM_CONVERTER(Projective3f);
+  EIGEN_TRANSFORM_CONVERTER(Projective2d);
+  EIGEN_TRANSFORM_CONVERTER(Projective3d);
+
   MAT_CONV(2, 3, double);
   MAT_CONV(X, 3, double);
   MAT_CONV(X, X, double);
