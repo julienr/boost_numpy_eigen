@@ -24,6 +24,19 @@ link_directories(${BoostNumPy_LIBRARY_DIR})
 add_library(boost_numpy_eigen SHARED src/eigen_numpy.cc)
 target_link_libraries(boost_numpy_eigen ${Boost_LIBRARIES} ${BoostNumPy_LIBRARIES} ${PYTHON_LIBRARIES})
 
+add_library(boost_numpy_eigen_python SHARED
+  src/python.cc
+)
+target_link_libraries(boost_numpy_eigen_python
+  boost_numpy_eigen
+  ${Boost_LIBRARIES}
+)
+set_target_properties(boost_numpy_eigen_python PROPERTIES
+  OUTPUT_NAME boost_numpy_eigen
+  PREFIX ""
+  SUFFIX ".so"
+)
+
 install(TARGETS boost_numpy_eigen
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
