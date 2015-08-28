@@ -1,22 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(boost.numpy_eigen)
+project(BoostNumpyEigen)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(PythonLibs 2 REQUIRED)
-include_directories(${PYTHON_INCLUDE_DIRS})
-
 find_package(Boost COMPONENTS python REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 find_package(NumPy)
-include_directories(${NUMPY_INCLUDE_DIRS})
+
+include_directories(
+	${PYTHON_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
+	${EIGEN3_INCLUDE_DIR}
+	${NUMPY_INCLUDE_DIRS}
+)
 
 include_directories(${BoostNumPy_INCLUDE_DIR})
 link_directories(${BoostNumPy_LIBRARY_DIR})
@@ -42,6 +39,24 @@ install(TARGETS boost_numpy_eigen
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 install(FILES src/eigen_numpy.h DESTINATION include/boost/)
+
+# Create CMake package configuration.
+set(INCLUDE_INSTALL_DIR include/ ... CACHE )
+set(LIB_INSTALL_DIR lib/ ... CACHE )
+set(SYSCONFIG_INSTALL_DIR etc/BoostNumpyEigen/ ... CACHE )
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(BoostNumpyEigenConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfig.cmake
+	INSTALL_DESTINATION ${LIB_INSTALL_DIR}/BoostNumpyEigen/cmake
+	PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfigVersion.cmake
+	VERSION 0.1.0
+	COMPATIBILITY SameMajorVersion )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfigVersion.cmake
+        DESTINATION ${LIB_INSTALL_DIR}/BoostNumpyEigen/cmake )
 
 # Building a package with CPack.
 set(CPACK_PACKAGE_NAME boost-numpy-eigen)
