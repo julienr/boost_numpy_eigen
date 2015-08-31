@@ -19,7 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 find_package(PythonLibs 2 REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(NumPy)
+find_package(NumPy REQUIRED)
 find_package(BoostNumpy)
 
 # Global settings for include paths.
@@ -28,6 +28,7 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${NUMPY_INCLUDE_DIRS}
+    ${BoostNumpy_INCLUDE_DIR}
 )
 
 include_directories(${BoostNumPy_INCLUDE_DIR})
@@ -60,14 +61,12 @@ set(INCLUDE_INSTALL_DIR include/ CACHE PATH
     "The subdirectory relative to the install prefix where header will be installed (default prefix/include)")
 set(LIB_INSTALL_DIR lib/ CACHE PATH
     "The subdirectory relative to the install prefix where libraries will be installed (default is prefix/lib)")
-set(SYSCONFIG_INSTALL_DIR etc/ CACHE PATH
-    "The subdirectory relative to the install prefix where sysconfig will be installed (default prefix/etc)")
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/BoostNumpyEigenConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfig.cmake
     INSTALL_DESTINATION ${LIB_INSTALL_DIR}/BoostNumpyEigen/cmake
-    PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+    PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR)
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyEigenConfigVersion.cmake
     VERSION 0.1.0
