@@ -8,8 +8,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 if (NOT DEFINED MODULE_INSTALL_PREFIX)
   find_package(PythonInterp REQUIRED)
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-    "from distutils.sysconfig import get_python_lib;\
-    print(get_python_lib(plat_specific=True, prefix=''))"
+    "from distutils.sysconfig import get_python_lib;print(get_python_lib(plat_specific=True, prefix=''))"
     OUTPUT_VARIABLE MODULE_INSTALL_PREFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
