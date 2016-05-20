@@ -253,12 +253,18 @@ struct EigenTransformFromPython {
 
 static const int X = Eigen::Dynamic;
 
+// wrapper function to support python2 and python3
+static void* init_numpy() {
+    import_array();
+    return NULL;
+}
+
 void SetupEigenConverters() {
   static bool is_setup = false;
   if (is_setup) return;
   is_setup = true;
 
-  import_array();
+  init_numpy();
 
   EIGEN_MATRIX_CONVERTER(Matrix2f);
   EIGEN_MATRIX_CONVERTER(Matrix2d);
