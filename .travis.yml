@@ -10,7 +10,7 @@ python:
 
 install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libboost-python-dev python-numpy python3-numpy libpython-dev libpython3-dev python-sphinx
+  - sudo apt-get install -y libeigen3-dev libboost-python-dev python-numpy python3-numpy libpython-dev libpython3-dev
   - cd ..
   - git clone https://github.com/personalrobotics/Boost.NumPy.git
   - cd Boost.NumPy
