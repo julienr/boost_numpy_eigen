@@ -255,9 +255,14 @@ struct EigenTransformFromPython {
 
 static const int X = Eigen::Dynamic;
 
-void SetupEigenConverters() {
+#if PY_MAJOR_VERSION >= 3
+int
+#else
+void
+#endif
+SetupEigenConverters() {
   static bool is_setup = false;
-  if (is_setup) return;
+  if (is_setup) return NUMPY_IMPORT_ARRAY_RETVAL;
   is_setup = true;
 
   import_array();
