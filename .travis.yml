@@ -1,0 +1,20 @@
+language: python
+
+sudo: required
+
+dist: trusty
+
+python:
+  - "2.7"
+  - "3.4"
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libboost-python-dev python-numpy python3-numpy libpython-dev libpython3-dev python-sphinx
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DBOOST_NUMPY_EIGEN_PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
+  - make -j4
+  - sudo make install
