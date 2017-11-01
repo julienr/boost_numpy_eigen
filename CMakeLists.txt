@@ -45,20 +45,20 @@ include_directories(
   ${BoostNumpy_INCLUDE_DIR}
 )
 
-add_library(BOOST_NUMPY_EIGEN_eigen SHARED
+add_library(boost_numpy_eigen SHARED
   src/eigen_numpy.cc
   src/python.cc
 )
-target_link_libraries(BOOST_NUMPY_EIGEN_eigen
+target_link_libraries(boost_numpy_eigen
   ${BoostNumPy_LIBRARIES}
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
-set_target_properties(BOOST_NUMPY_EIGEN_eigen PROPERTIES
+set_target_properties(boost_numpy_eigen PROPERTIES
   PREFIX ""
   SUFFIX ".so"
 )
 
-install(TARGETS BOOST_NUMPY_EIGEN_eigen
+install(TARGETS boost_numpy_eigen
   LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}"
 )
