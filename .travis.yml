@@ -1,0 +1,29 @@
+language: python
+
+sudo: required
+
+dist: trusty
+
+python:
+  - "2.7"
+  - "3.4"
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libeigen3-dev libboost-python-dev python-numpy python3-numpy libpython-dev libpython3-dev
+  - cd ..
+  - git clone https://github.com/personalrobotics/Boost.NumPy.git
+  - cd Boost.NumPy
+  - mkdir build
+  - cd build
+  - cmake -DBOOST_NUMPY_PYTHON_VERSION=$TRAVIS_PYTHON_VERSION ..
+  - make -j4
+  - sudo make install
+  - cd ../../Boost.NumPy_Eigen
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DBOOST_NUMPY_EIGEN_PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
+  - make -j4
+  - sudo make install
