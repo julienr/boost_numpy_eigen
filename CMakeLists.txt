@@ -28,12 +28,13 @@ if(${PYTHON_VERSION_STRING} GREATER 3.0)
   if (NOT Boost_FOUND)
     find_package(Boost COMPONENTS python3 REQUIRED)
   endif()
+  find_package(BoostPython3Numpy REQUIRED)
 else()
   find_package(Boost COMPONENTS python REQUIRED)
+  find_package(BoostPython2Numpy REQUIRED)
 endif()
 find_package(Eigen3 REQUIRED)
 find_package(NumPy ${BOOST_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
-find_package(BoostNumpy)
 
 # Global settings for include paths.
 include_directories(
