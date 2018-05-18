@@ -5,11 +5,11 @@ project(BoostNumpyEigen)
 # module search path.
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-if(NOT BOOST_NUMPY_EIGEN_PYTHON_VERSION)
-  set(BOOST_NUMPY_EIGEN_PYTHON_VERSION 3.4 CACHE STRING "Choose the target Python version (e.g., 3.4, 2.7)" FORCE)
+if(NOT BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION)
+  set(BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION 3.4 CACHE STRING "Choose the target Python version (e.g., 3.4, 2.7)" FORCE)
 endif()
 
-find_package(PythonInterp ${BOOST_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
+find_package(PythonInterp ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   "from distutils.sysconfig import get_python_lib;\
   print(get_python_lib(plat_specific=True, prefix=''))"
@@ -22,7 +22,7 @@ set(MODULE_INSTALL_PREFIX "${MODULE_INSTALL_PREFIX}" CACHE STRING
 message(STATUS "Installing Python module to: ${MODULE_INSTALL_PREFIX}")
 
 # Find required python packages.
-find_package(PythonLibs ${BOOST_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
+find_package(PythonLibs ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
 if(${PYTHON_VERSION_STRING} GREATER 3.0)
   find_package(Boost COMPONENTS python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
   if (NOT Boost_FOUND)
@@ -34,7 +34,7 @@ else()
   find_package(BoostPython2Numpy REQUIRED)
 endif()
 find_package(Eigen3 REQUIRED)
-find_package(NumPy ${BOOST_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
+find_package(NumPy ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
 
 # Global settings for include paths.
 include_directories(
