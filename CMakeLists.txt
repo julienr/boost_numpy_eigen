@@ -28,11 +28,22 @@ if(${PYTHON_VERSION_STRING} GREATER 3.0)
   if (NOT Boost_FOUND)
     find_package(Boost COMPONENTS python3 REQUIRED)
   endif()
-  find_package(BoostPython3Numpy REQUIRED)
+
+  # Boost.Numpy is included in Boost since 1.63.0 so we don't need to use custom
+  # package.
+  if(Boost_VERSION VERSION_LESS 1.63.0)
+    find_package(BoostPython3Numpy REQUIRED)
+  endif()
 else()
   find_package(Boost COMPONENTS python REQUIRED)
-  find_package(BoostPython2Numpy REQUIRED)
+
+  # Boost.Numpy is included in Boost since 1.63.0 so we don't need to use custom
+  # package.
+  if(Boost_VERSION VERSION_LESS 1.63.0)
+    find_package(BoostPython2Numpy REQUIRED)
+  endif()
 endif()
+
 find_package(Eigen3 REQUIRED)
 find_package(NumPy ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
 

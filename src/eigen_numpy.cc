@@ -1,6 +1,6 @@
 #include <Eigen/Eigen>
-#include <boost/numpy.hpp>
 #include <numpy/arrayobject.h>
+#include "backward_compatibility.h"
 
 // These macros were renamed in NumPy 1.7.1.
 #ifndef NPY_ARRAY_C_CONTIGUOUS
@@ -16,7 +16,6 @@
 #endif
 
 namespace bp = boost::python;
-namespace np = boost::numpy;
 
 using namespace Eigen;
 
