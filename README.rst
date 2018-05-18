@@ -1,4 +1,7 @@
-# Boost.NumPy_Eigen [![Build Status](https://travis-ci.org/personalrobotics/Boost.NumPy_Eigen.svg?branch=master)](https://travis-ci.org/personalrobotics/Boost.NumPy_Eigen)
+Boost.NumPy_Eigen
+
+.. image:: https://travis-ci.org/personalrobotics/Boost.NumPy_Eigen.svg?branch=master
+    :target: https://travis-ci.org/personalrobotics/Boost.NumPy_Eigen
 
 This is a simple example on how to use boost.python and boost.numpy to call
 c++ code form python and convert numpy arrays to Eigen.
