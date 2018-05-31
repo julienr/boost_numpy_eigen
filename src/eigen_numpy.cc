@@ -1,18 +1,15 @@
+#include <boost/python.hpp>
 #include <Eigen/Eigen>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
-#include "backward_compatibility.h"
 
 // These macros were renamed in NumPy 1.7.1.
-#ifndef NPY_ARRAY_C_CONTIGUOUS
-#ifdef NPY_C_CONTIGUOUS
+#if !defined(NPY_ARRAY_C_CONTIGUOUS) && defined(NPY_C_CONTIGUOUS)
 #define NPY_ARRAY_C_CONTIGUOUS NPY_C_CONTIGUOUS
 #endif
-#endif
 
-#ifndef NPY_ARRAY_ALIGNED
-#ifdef NPY_ALIGNED
+#if !defined(NPY_ARRAY_ALIGNED) && defined(NPY_ALIGNED)
 #define NPY_ARRAY_ALIGNED NPY_ALIGNED
-#endif
 #endif
 
 namespace bp = boost::python;
@@ -95,11 +92,12 @@ struct EigenMatrixFromPython {
   }
 
   static void* convertible(PyObject* obj_ptr) {
-    if (!PyArray_Check(obj_ptr)) {
+    PyArrayObject *array = reinterpret_cast<PyArrayObject*>(obj_ptr);
+    if (!PyArray_Check(array)) {
       //LOG(ERROR) << "PyArray_Check failed";
       return 0;
     }
-    if (PyArray_NDIM(obj_ptr) > 2) {
+    if (PyArray_NDIM(array) > 2) {
       //LOG(ERROR) << "dim > 2";
       return 0;
     }
@@ -107,7 +105,7 @@ struct EigenMatrixFromPython {
       //LOG(ERROR) << "types not compatible";
       return 0;
     }
-    int flags = PyArray_FLAGS(obj_ptr);
+    int flags = PyArray_FLAGS(array);
     if (!(flags & NPY_ARRAY_C_CONTIGUOUS)) {
       //LOG(ERROR) << "Contiguous C array required";
       return 0;
@@ -127,17 +125,17 @@ struct EigenMatrixFromPython {
     using bp::extract;
 
     PyArrayObject *array = reinterpret_cast<PyArrayObject*>(obj_ptr);
-    int ndims = PyArray_NDIM(obj_ptr);
+    int ndims = PyArray_NDIM(array);
+    npy_intp* dimensions = PyArray_DIMS(array);
 
-    int dtype_size = (PyArray_DESCR(obj_ptr))->elsize;
-    int s1 = PyArray_STRIDE(obj_ptr, 0);
+    int dtype_size = (PyArray_DESCR(array))->elsize;
+    int s1 = PyArray_STRIDE(array, 0);
     //CHECK_EQ(0, s1 % dtype_size);
     int s2 = 0;
     if (ndims > 1) {
-      s2 = PyArray_STRIDE(obj_ptr, 1);
+      s2 = PyArray_STRIDE(array, 1);
       //CHECK_EQ(0, s2 % dtype_size);
     }
-
 
     int nrows = R;
     int ncols = C;
@@ -145,13 +143,13 @@ struct EigenMatrixFromPython {
       if (R != Eigen::Dynamic) {
         //CHECK_EQ(R, array->dimensions[0]);
       } else {
-        nrows = array->dimensions[0];
+        nrows = dimensions[0];
       }
 
       if (C != Eigen::Dynamic) {
         //CHECK_EQ(C, array->dimensions[1]);
       } else {
-        ncols = array->dimensions[1];
+        ncols = dimensions[1];
       }
     } else {
       //CHECK_EQ(1, ndims);
@@ -167,7 +165,7 @@ struct EigenMatrixFromPython {
         if (C != Eigen::Dynamic) {
           //CHECK_EQ(C, array->dimensions[0]);
         } else {
-          ncols = array->dimensions[0];
+          ncols = dimensions[0];
         }
         // We have received a 1xC array and want to transform to VectorCd,
         // so we need to transpose
@@ -178,7 +176,7 @@ struct EigenMatrixFromPython {
         if (R != Eigen::Dynamic) {
           //CHECK_EQ(R, array->dimensions[0]);
         } else {
-          nrows = array->dimensions[0];
+          nrows = dimensions[0];
         }
       }
     }
@@ -254,8 +252,8 @@ struct EigenTransformFromPython {
 
 static const int X = Eigen::Dynamic;
 
-#if PY_MAJOR_VERSION >= 3
-int
+#if PY_VERSION_HEX >= 0x03000000
+void*
 #else
 void
 #endif

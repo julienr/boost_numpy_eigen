@@ -1,14 +1,12 @@
-#include <boost/numpy.hpp>
+#include <boost/python.hpp>
 
 #include "eigen_numpy.h"
 
 #include "hello.h"
 
 namespace bp = boost::python;
-namespace np = boost::numpy;
 
 BOOST_PYTHON_MODULE(libhello) {
-  np::initialize();
   SetupEigenConverters();
 
   bp::def("Greet", Greet);

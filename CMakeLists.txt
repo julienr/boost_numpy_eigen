@@ -28,20 +28,8 @@ if(${PYTHON_VERSION_STRING} GREATER 3.0)
   if (NOT Boost_FOUND)
     find_package(Boost COMPONENTS python3 REQUIRED)
   endif()
-
-  # Boost.Numpy is included in Boost since 1.63.0 so we don't need to use custom
-  # package.
-  if(Boost_VERSION VERSION_LESS 1.63.0)
-    find_package(BoostPython3Numpy REQUIRED)
-  endif()
 else()
   find_package(Boost COMPONENTS python REQUIRED)
-
-  # Boost.Numpy is included in Boost since 1.63.0 so we don't need to use custom
-  # package.
-  if(Boost_VERSION VERSION_LESS 1.63.0)
-    find_package(BoostPython2Numpy REQUIRED)
-  endif()
 endif()
 
 find_package(Eigen3 REQUIRED)
@@ -51,18 +39,16 @@ find_package(NumPy ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
 include_directories(
   ${PYTHON_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${BoostNumPy_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${NUMPY_INCLUDE_DIRS}
-  ${BoostNumpy_INCLUDE_DIR}
 )
 
+# main library
 add_library(boost_numpy_eigen SHARED
   src/eigen_numpy.cc
   src/python.cc
 )
 target_link_libraries(boost_numpy_eigen
-  ${BoostNumPy_LIBRARIES}
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
@@ -70,7 +56,23 @@ set_target_properties(boost_numpy_eigen PROPERTIES
   PREFIX ""
   SUFFIX ".so"
 )
-
 install(TARGETS boost_numpy_eigen
   LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}"
+)
+
+# unit test
+add_library(test_eigen_numpy_mod SHARED EXCLUDE_FROM_ALL src/test_eigen_numpy_mod.cc)
+target_link_libraries(test_eigen_numpy_mod boost_numpy_eigen)
+set_target_properties(test_eigen_numpy_mod PROPERTIES PREFIX "")
+add_custom_command(TARGET test_eigen_numpy_mod
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy test_eigen_numpy_mod*.so ${CMAKE_SOURCE_DIR}
+)
+
+# example
+add_library(hello SHARED EXCLUDE_FROM_ALL src/hello.cc src/hello_mod.cc)
+target_link_libraries(hello boost_numpy_eigen)
+add_custom_command(TARGET hello
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy libhello*.so ${CMAKE_SOURCE_DIR}
 )

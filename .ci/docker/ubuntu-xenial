@@ -9,5 +9,6 @@ RUN apt-get install -y \
     lsb-release \
     pkg-config \
     python \
+    python3 \
     software-properties-common \
     sudo
