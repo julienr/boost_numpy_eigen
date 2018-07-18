@@ -23,13 +23,26 @@ message(STATUS "Installing Python module to: ${MODULE_INSTALL_PREFIX}")
 
 # Find required python packages.
 find_package(PythonLibs ${BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION} REQUIRED)
-if(${PYTHON_VERSION_STRING} GREATER 3.0)
-  find_package(Boost COMPONENTS python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-  if (NOT Boost_FOUND)
-    find_package(Boost COMPONENTS python3 REQUIRED)
+
+# Find boost with python components. The name of python component varies
+# depending on the platform, boost version, and python version.
+if(APPLE)
+  find_package(Boost REQUIRED
+    COMPONENTS
+      python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+  )
+else() # LINUX assumed
+  if(${PYTHON_VERSION_MAJOR} EQUAL 3)
+    find_package(Boost
+      COMPONENTS
+        python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+    )
+    if(NOT Boost_FOUND)
+      find_package(Boost REQUIRED COMPONENTS python3)
+    endif()
+  else() # Python 2 assumed
+    find_package(Boost REQUIRED COMPONENTS python)
   endif()
-else()
-  find_package(Boost COMPONENTS python REQUIRED)
 endif()
 
 find_package(Eigen3 REQUIRED)
@@ -54,7 +67,7 @@ target_link_libraries(boost_numpy_eigen
 )
 set_target_properties(boost_numpy_eigen PROPERTIES
   PREFIX ""
-  SUFFIX ".so"
+  SUFFIX ".so"  # python uses '.so' extension even on macOS
 )
 install(TARGETS boost_numpy_eigen
   LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}"
@@ -63,6 +76,9 @@ install(TARGETS boost_numpy_eigen
 # unit test
 add_library(test_eigen_numpy_mod SHARED EXCLUDE_FROM_ALL src/test_eigen_numpy_mod.cc)
 target_link_libraries(test_eigen_numpy_mod boost_numpy_eigen)
+set_target_properties(test_eigen_numpy_mod PROPERTIES
+  SUFFIX ".so"  # python uses '.so' extension even on macOS
+)
 set_target_properties(test_eigen_numpy_mod PROPERTIES PREFIX "")
 add_custom_command(TARGET test_eigen_numpy_mod
   POST_BUILD
@@ -72,6 +88,9 @@ add_custom_command(TARGET test_eigen_numpy_mod
 # example
 add_library(hello SHARED EXCLUDE_FROM_ALL src/hello.cc src/hello_mod.cc)
 target_link_libraries(hello boost_numpy_eigen)
+set_target_properties(hello PROPERTIES
+  SUFFIX ".so"  # python uses '.so' extension even on macOS
+)
 add_custom_command(TARGET hello
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy libhello*.so ${CMAKE_SOURCE_DIR}

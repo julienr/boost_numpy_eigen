@@ -1,4 +1,4 @@
-language: python
+language: cpp
 
 sudo: required
 
@@ -6,32 +6,50 @@ dist: trusty
 
 matrix:
   include:
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_TRUSTY_2_7
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="2.7"
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_TRUSTY_3_4
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="3.4"
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_XENIAL_2_7
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="2.7"
         - DOCKER_FILE="ubuntu-xenial"
       services: docker
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_XENIAL_3_5
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="3.5"
         - DOCKER_FILE="ubuntu-xenial"
       services: docker
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_BIONIC_2_7
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="2.7"
         - DOCKER_FILE="ubuntu-bionic"
       services: docker
-    - env:
+    - os: linux
+      compiler: gcc
+      env:
         - BUILD_NAME=UBUNTU_BIONIC_3_6
         - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="3.6"
         - DOCKER_FILE="ubuntu-bionic"
       services: docker
+    - os: osx
+      osx_image: xcode9.3
+      compiler: clang
+      env:
+        - BUILD_NAME=OSX
+        - BOOST_PYTHON_NUMPY_EIGEN_PYTHON_VERSION="3.7"
 
 before_install:
   - if [ -n "$DOCKER_FILE" ]; then

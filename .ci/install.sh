@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
 
-set -ex
-
-sudo apt-get -qq update
-sudo apt-get install -y \
-  libboost-python-dev \
-  libeigen3-dev \
-  libpython3-dev \
-  python-numpy \
-  python3-numpy
+if [ "$TRAVIS_OS_NAME" = "linux" ]; then '.ci/install_linux.sh' ; fi
+if [ "$TRAVIS_OS_NAME" = "osx"   ]; then '.ci/install_osx.sh'   ; fi
