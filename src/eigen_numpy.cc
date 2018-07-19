@@ -1,10 +1,18 @@
+#include <boost/python.hpp>
 #include <Eigen/Eigen>
-#include <boost/numpy.hpp>
-#include <glog/logging.h>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
+// These macros were renamed in NumPy 1.7.1.
+#if !defined(NPY_ARRAY_C_CONTIGUOUS) && defined(NPY_C_CONTIGUOUS)
+#define NPY_ARRAY_C_CONTIGUOUS NPY_C_CONTIGUOUS
+#endif
+
+#if !defined(NPY_ARRAY_ALIGNED) && defined(NPY_ALIGNED)
+#define NPY_ARRAY_ALIGNED NPY_ALIGNED
+#endif
+
 namespace bp = boost::python;
-namespace np = boost::numpy;
 
 using namespace Eigen;
 
@@ -84,25 +92,26 @@ struct EigenMatrixFromPython {
   }
 
   static void* convertible(PyObject* obj_ptr) {
-    if (!PyArray_Check(obj_ptr)) {
-      LOG(ERROR) << "PyArray_Check failed";
+    PyArrayObject *array = reinterpret_cast<PyArrayObject*>(obj_ptr);
+    if (!PyArray_Check(array)) {
+      //LOG(ERROR) << "PyArray_Check failed";
       return 0;
     }
-    if (PyArray_NDIM(obj_ptr) > 2) {
-      LOG(ERROR) << "dim > 2";
+    if (PyArray_NDIM(array) > 2) {
+      //LOG(ERROR) << "dim > 2";
       return 0;
     }
     if (PyArray_ObjectType(obj_ptr, 0) != NumpyEquivalentType<typename MatType::Scalar>::type_code) {
-      LOG(ERROR) << "types not compatible";
+      //LOG(ERROR) << "types not compatible";
       return 0;
     }
-    int flags = PyArray_FLAGS(obj_ptr);
+    int flags = PyArray_FLAGS(array);
     if (!(flags & NPY_ARRAY_C_CONTIGUOUS)) {
-      LOG(ERROR) << "Contiguous C array required";
+      //LOG(ERROR) << "Contiguous C array required";
       return 0;
     }
     if (!(flags & NPY_ARRAY_ALIGNED)) {
-      LOG(ERROR) << "Aligned array required";
+      //LOG(ERROR) << "Aligned array required";
       return 0;
     }
     return obj_ptr;
@@ -116,47 +125,47 @@ struct EigenMatrixFromPython {
     using bp::extract;
 
     PyArrayObject *array = reinterpret_cast<PyArrayObject*>(obj_ptr);
-    int ndims = PyArray_NDIM(obj_ptr);
+    int ndims = PyArray_NDIM(array);
+    npy_intp* dimensions = PyArray_DIMS(array);
 
-    int dtype_size = (PyArray_DESCR(obj_ptr))->elsize;
-    int s1 = PyArray_STRIDE(obj_ptr, 0);
-    CHECK_EQ(0, s1 % dtype_size);
+    int dtype_size = (PyArray_DESCR(array))->elsize;
+    int s1 = PyArray_STRIDE(array, 0);
+    //CHECK_EQ(0, s1 % dtype_size);
     int s2 = 0;
     if (ndims > 1) {
-      s2 = PyArray_STRIDE(obj_ptr, 1);
-      CHECK_EQ(0, s2 % dtype_size);
+      s2 = PyArray_STRIDE(array, 1);
+      //CHECK_EQ(0, s2 % dtype_size);
     }
-
 
     int nrows = R;
     int ncols = C;
     if (ndims == 2) {
       if (R != Eigen::Dynamic) {
-        CHECK_EQ(R, array->dimensions[0]);
+        //CHECK_EQ(R, array->dimensions[0]);
       } else {
-        nrows = array->dimensions[0];
+        nrows = dimensions[0];
       }
 
       if (C != Eigen::Dynamic) {
-        CHECK_EQ(C, array->dimensions[1]);
+        //CHECK_EQ(C, array->dimensions[1]);
       } else {
-        ncols = array->dimensions[1];
+        ncols = dimensions[1];
       }
     } else {
-      CHECK_EQ(1, ndims);
+      //CHECK_EQ(1, ndims);
       // Vector are a somehow special case because for Eigen, everything is
       // a 2D array with a dimension set to 1, but to numpy, vectors are 1D
       // arrays
       // So we could get a 1x4 array for a Vector4
 
       // For a vector, at least one of R, C must be 1
-      CHECK(R == 1 || C == 1);
+      //CHECK(R == 1 || C == 1);
 
       if (R == 1) {
         if (C != Eigen::Dynamic) {
-          CHECK_EQ(C, array->dimensions[0]);
+          //CHECK_EQ(C, array->dimensions[0]);
         } else {
-          ncols = array->dimensions[0];
+          ncols = dimensions[0];
         }
         // We have received a 1xC array and want to transform to VectorCd,
         // so we need to transpose
@@ -165,17 +174,16 @@ struct EigenMatrixFromPython {
         std::swap(s1, s2);
       } else {
         if (R != Eigen::Dynamic) {
-          CHECK_EQ(R, array->dimensions[0]);
+          //CHECK_EQ(R, array->dimensions[0]);
         } else {
-          nrows = array->dimensions[0];
+          nrows = dimensions[0];
         }
       }
     }
 
     T* raw_data = reinterpret_cast<T*>(PyArray_DATA(array));
 
-    typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>, Aligned,
-                Stride<Dynamic, Dynamic>> MapType;
+    typedef Map<Matrix<T, Dynamic, Dynamic, RowMajor>, Aligned, Stride<Dynamic, Dynamic> > MapType;
 
     void* storage=((bp::converter::rvalue_from_python_storage<MatType>*)
                    (data))->storage.bytes;
@@ -190,9 +198,39 @@ struct EigenMatrixFromPython {
   }
 };
 
+
+template<class TransformType> // MatrixXf or MatrixXd
+struct EigenTransformToPython {
+  static PyObject* convert(const TransformType& transform) {
+      return EigenMatrixToPython<typename TransformType::MatrixType>::convert(transform.matrix());
+  }
+};
+
+template<typename TransformType>
+struct EigenTransformFromPython {
+  EigenTransformFromPython() {
+    bp::converter::registry::push_back(&convertible,
+                                       &construct,
+                                       bp::type_id<TransformType>());
+  }
+
+  static void* convertible(PyObject* obj_ptr) {
+    return EigenMatrixFromPython<typename TransformType::MatrixType>::convertible(obj_ptr);
+  }
+
+  static void construct(PyObject* obj_ptr,
+                        bp::converter::rvalue_from_python_stage1_data* data) {
+    return EigenMatrixFromPython<typename TransformType::MatrixType>::construct(obj_ptr, data);
+  }
+};
+
 #define EIGEN_MATRIX_CONVERTER(Type) \
   EigenMatrixFromPython<Type>();  \
   bp::to_python_converter<Type, EigenMatrixToPython<Type> >();
+
+#define EIGEN_TRANSFORM_CONVERTER(Type) \
+  EigenTransformFromPython<Type>();  \
+  bp::to_python_converter<Type, EigenTransformToPython<Type> >();
 
 #define MAT_CONV(R, C, T) \
   typedef Matrix<T, R, C> Matrix ## R ## C ## T; \
@@ -214,7 +252,16 @@ struct EigenMatrixFromPython {
 
 static const int X = Eigen::Dynamic;
 
-void SetupEigenConverters() {
+#if PY_VERSION_HEX >= 0x03000000
+void*
+#else
+void
+#endif
+SetupEigenConverters() {
+  static bool is_setup = false;
+  if (is_setup) return NUMPY_IMPORT_ARRAY_RETVAL;
+  is_setup = true;
+
   import_array();
 
   EIGEN_MATRIX_CONVERTER(Matrix2f);
@@ -230,6 +277,21 @@ void SetupEigenConverters() {
   EIGEN_MATRIX_CONVERTER(Vector2d);
   EIGEN_MATRIX_CONVERTER(Vector3d);
   EIGEN_MATRIX_CONVERTER(Vector4d);
+
+  EIGEN_TRANSFORM_CONVERTER(Affine2f);
+  EIGEN_TRANSFORM_CONVERTER(Affine3f);
+  EIGEN_TRANSFORM_CONVERTER(Affine2d);
+  EIGEN_TRANSFORM_CONVERTER(Affine3d);
+
+  EIGEN_TRANSFORM_CONVERTER(Isometry2f);
+  EIGEN_TRANSFORM_CONVERTER(Isometry3f);
+  EIGEN_TRANSFORM_CONVERTER(Isometry2d);
+  EIGEN_TRANSFORM_CONVERTER(Isometry3d);
+
+  EIGEN_TRANSFORM_CONVERTER(Projective2f);
+  EIGEN_TRANSFORM_CONVERTER(Projective3f);
+  EIGEN_TRANSFORM_CONVERTER(Projective2d);
+  EIGEN_TRANSFORM_CONVERTER(Projective3d);
 
   MAT_CONV(2, 3, double);
   MAT_CONV(X, 3, double);

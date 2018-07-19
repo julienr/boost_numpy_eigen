@@ -1,0 +1,25 @@
+<?xml version="1.0"?> 
+<package format="2">
+  <name>boost_numpy_eigen</name>
+  <version>0.1.0</version>
+  <description>
+    Automatic conversions between NumPy and Eigen using Boost.NumPy.
+  </description>
+  <url type="website">https://github.com/personalrobotics/Boost.NumPy</url>
+  <url type="repository">https://github.com/personalrobotics/Boost.NumPy.git</url>
+  <url type="bugtracker">https://github.com/personalrobotics/Boost.NumPy/issues</url>
+  <maintainer email="mkoval@cs.cmu.edu">Michael Koval</maintainer>
+  <author>Julien Rebetez</author>
+  <license>Boost Software License</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <depend>boost</depend>
+  <depend>boost_numpy</depend>
+  <depend>eigen</depend>
+  <depend>python</depend>
+  <depend>python-numpy</depend>
+  <!-- These are required by REP-136. -->
+  <exec_depend>catkin</exec_depend>
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
