@@ -1,3 +1,8 @@
+This has been archived. New home is at
+
+https://github.com/personalrobotics/boost_numpy_eigen
+
+
 This is a simple example on how to use boost.python and boost.numpy to call
 c++ code form python and convert numpy arrays to Eigen.
 
